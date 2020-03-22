@@ -1,6 +1,6 @@
 # Inferential Experiment Design
 
-[Note: This is my class notes collected from Mochen Yang's class. Copy right belongs to him.]
+[Note: This is my class notes collected from [Mochen Yang](https://carlsonschool.umn.edu/faculty/mochen-yang)'s class. Copy right belongs to him.]
 
 ### 1. Correlation and Causation
 
