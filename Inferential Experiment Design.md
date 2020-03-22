@@ -134,7 +134,7 @@ They may conceal behaviors they think are undesirable, or lie about behaviors
 
 doing what they think the experimenter would want them to do.
 
-![technical notes](https://github.com/Olliang/MSBA-Stats-Notes/blob/master/images/experiment%20-%20technical.PNG)
+
 
 
 **Example:** The company is certainly profitable for the company to increase rental. Your manager wants to know how customers respond to price change.
@@ -213,7 +213,7 @@ summary(m7)
 # How to read the coefficient of the interaction term is negative => when you have a popular movie, the positive effect of the discount on lease is reduced.
 ```
 
-
+![technical notes](https://github.com/Olliang/MSBA-Stats-Notes/blob/master/images/experiment%20-%20technical.PNG)
 
 
 ## 5. Matching 
