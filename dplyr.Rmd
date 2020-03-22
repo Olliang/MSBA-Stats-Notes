@@ -1,0 +1,177 @@
+---
+title: "Data Manipulation with dplyr"
+author: "Olivia Liang"
+date: "October 8, 2019"
+output: html_document
+---
+
+# Import libraries
+```{r}
+library(dplyr)
+```
+
+# Import datasets
+```{r}
+# 2015 US Census
+babynames <- readRDS("babynames.rds")
+counties <- readRDS("counties.rds")
+```
+
+
+# 1. Select, filter, arrange, and mutate
+
+## Select
+```{r}
+
+counties_selected <-counties %>%
+  select(state, county, population, unemployment)
+
+glimpse(counties)
+
+```
+
+
+## filter and arrange - find interesting columns and rows
+```{r}
+# sort by population variable
+counties_selected %>%
+  arrange(population) 
+# sort by population variable, descending
+counties_selected %>%
+  arrange(desc(population))
+
+# get only counties in NY
+counties_selected %>%
+  arrange(desc(population)) %>%
+  filter(state == "New York", unemployment < 6)
+
+# filter for multiple names
+babynames %>%
+  filter(name %in% c('Amy', 'Christopher'))
+
+# sort rows by one specific column 
+arrange(df, desc(col))
+```
+
+
+## mutate
+```{r}
+# create a new variable using the existing variables
+counties_selected %>%
+  mutate(unemployed_pop = population * unemployment / 100)
+
+```
+
+# 2. Aggregating data
+
+## count
+```{r}
+# count the number of observations
+# Same function as nrow()
+counties %>%
+  count()
+# count the number of observations in each state and sort the result
+counties %>%
+  count(state, sort = TRUE)
+# COUNT the number of population for each state
+counties %>%
+  count(state, wt = population, sort = TRUE)
+
+```
+
+## group by and summarize
+
+Summarize: creates a aggregating table 
+```{r}
+# create a aggregating table containing:
+# the total number of population and the mean of unemploymentrate
+counties %>%
+  summarize(total_pop = sum(population),
+            avg_unemploy = mean(unemployment))
+
+# aggregate within groups
+counties %>%
+  group_by(state, metro) %>%
+  summarize(total_pop = sum(population),
+            avg_unemploy = mean(unemployment))
+
+# if you dont want to keep the grouped version:
+ungroup()
+
+
+#### top_n - keeping only the most extreme observation in each group
+# find the county with highest population within each state
+counties_selected %>%
+  group_by(state) %>%
+  top_n(1,population)  # only keep the first county in the state
+
+```
+
+# 3. Selecting and transforming variables
+
+## Select
+```{r}
+# select the columns that contains "work"
+counties %>%
+  select(state,county, contains('work'))
+# select the columns that starts with "income"
+counties %>%
+  select(state,county, starts_with('income'))
+# ends_with(), last_col()
+# most funcitons can be found by typing in "?select_helpers"
+
+# remove a variable
+counties %>%
+  select(-census_id)
+```
+
+## Rename 
+```{r}
+counties %>%
+  rename(unemploy = unemployment)
+
+# or use it when selecting (new name = old name)
+counties %>%
+  select(states = state,county, contains('work'))
+
+```
+
+## transmute - combination of select and mutate
+
+mutate: creates a new variable in the existing dataset based on original variables
+transmute: returns a new subset of columns that are transformed and changed
+```{r}
+# returns a subset of columns that are transformed and changed
+# return one piece of information of each county
+counties %>%
+  transmute(state, county, franction_men = men/population)
+
+
+#### grouped mutates - combining group_by and mutate
+# traditional way:
+babynames %>%
+  group_by(year) %>%
+  summarize(year_total = sum(number))
+# keep the original other variables in the table too
+babynames %>%
+  group_by(year) %>%
+  mutate(year_total = sum(number))
+
+# creating more new variables on top of the original dataset
+babynames %>%
+  group_by(year) %>%
+  mutate(year_total = sum(number)) %>%
+  ungroup() %>%
+  mutate(fraction = number / year_total)
+
+```
+
+# window function - compare consecutive steps
+```{r}
+#### window function - compare consecutive steps
+v <- c(1,3,6,14)
+lag(v) # move each value to the right by one
+# caculate the consecutive changes
+v - lag(v)
+```
+

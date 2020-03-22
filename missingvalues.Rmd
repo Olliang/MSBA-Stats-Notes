@@ -1,0 +1,449 @@
+---
+title: "Dealing with Missing Values"
+author: "Olivia Liang"
+date: "October 8, 2019"
+output: html_document
+---
+
+# 1. Why care about Missing values?
+
+## Define missing values: Not Available
+```{r}
+# detect missing values
+any_na(column)  # return one true or false for a column
+are_na(x)   # return true or false for every value in the column
+n_miss(x)   # return the number of missing values
+prop_miss(x)   # return the proportion of missing values
+n_complete(x)   # return the number of complete values
+prop_complete(x)   # return the proportion of complete values
+```
+
+*General Rules for missing values in R: *
+
+NA + (anything) = NA
+NaN: Not a Number would be treated as missing value in *any_na()*
+NULL: would not be treated as missing value in *any_na()*
+Inf: would not be treated as missing value in *any_na()*
+NA | TRUE returns TRUE
+NA | FALSE returns NA
+
+
+## Summarize missing values
+
+```{r}
+# 1. basic summaries of missingness:
+n_miss() # The number of rows that have missing values
+n_complete # The numebr of rows that dont have missing values
+
+# 2. dataframe summaries of missingness(work with group by):
+library(naniar)
+miss_var_summary(df)  # return summary of each variable
+miss_case_summary(df) # return summary of each observation
+
+# Return the summary of missingness in each variable, grouped by Month, in the `airquality` dataset
+airquality %>% group_by(Month) %>% miss_var_summary()
+
+# Tabulate missingness in each variable and case of the `airquality` dataset
+miss_var_table(airquality)
+miss_case_table(airquality)
+# describing the number of variables with # missing variables
+
+# Tabulate the missingness in each variable, grouped by Month, in the `airquality` dataset
+airquality %>% group_by(Month) %>% miss_var_table()
+
+# Tabulate of missingness in each case, grouped by Month, in the `airquality` dataset
+airquality %>% group_by(Month) %>% miss_case_table()
+
+
+## For time series data-
+# calculate the number of missings in a variable by repeating span
+# e.g. in span 10, there are 432 missing values and 3568 complete values.
+# note that the missing values and the complete values add up is equal to the span you set
+# Calculate the summaries for each run of missingness for the variable, hourly_counts
+miss_var_span(pedestrain, var = hourly_counts, span_every = 4000)
+```
+
+
+## For finding unusual pattern of missingness
+
+```{r}
+# finding repeating paterns of missingness
+miss_var_run(pedestrian,hourly_counts)
+
+# Calculate the summaries for each run of missingness for the variable, hourly_counts
+miss_var_run(pedestrian, var = hourly_counts)
+
+# Calculate the summaries for each span of missingness, for a span of 4000, for the variable hourly_counts
+miss_var_span(pedestrian, var = hourly_counts, span_every = 4000)
+
+# For each `month` variable, calculate the run of missingness for hourly_counts
+pedestrian %>% group_by(month) %>% miss_var_run(var = hourly_counts)
+
+# For each `month` variable, calculate the span of missingness of a span of 2000, for the variable hourly_counts
+pedestrian %>% group_by(month) %>% miss_var_span(var = hourly_counts, span_every = 2000)
+
+```
+
+
+## How do we visualize missing values?
+
+
+```{r}
+
+vis_miss(airquality)
+
+vis_miss(airquality, cluster = TRUE)
+vis_miss(riskfactors, sort_miss = TRUE)
+
+gg_miss_case(airquality)
+gg_miss_var(airquality)
+gg_miss_var(airquality, facet = Month)
+gg_miss_upset(airquality)   # show missing patterns
+gg_miss_fct(x = airquality, fct = Month) # heat map of a variable's missingness
+gg_miss_span(pedestrian, hourly_countsm, span_every = 3000)
+# show the numebr of missing in a given span
+
+# Using the airquality dataset, explore the missingness pattern using gg_miss_upset()
+gg_miss_upset(airquality)
+
+# With the riskfactors dataset, explore how the missingness changes across the marital variable using gg_miss_fct()
+gg_miss_fct(x = riskfactors, fct = marital)
+
+# Using the pedestrian dataset, explore how the missingness of hourly_counts changes over a span of 3000 
+gg_miss_span(pedestrian, var = hourly_counts, span_every = 3000)
+
+# Using the pedestrian dataset, explore the impact of month by facetting by month
+# and explore how missingness changes for a span of 1000
+gg_miss_span(pedestrian, var = hourly_counts , span_every = 1000, facet = month)
+
+```
+
+# Wrangling and tidying up missing values
+
+When missing values are not labeled as NA, but other forms like "missing", "Not Available", "N/A"
+```{r}
+#search for weird missing values
+chaos %>%
+  miss_scan_count(search = list('NA','N/a'))
+
+#replace weird missing values with real missing value symbol
+chaos %>%
+  replace_with_na(replace = list(grade = c('N/A', 'N/a')))
+# replace more than one variable
+replace_with_na(data = pacman, replace = list(year = c("N/A", "na", "missing"),score = c("N/A", "na", "missing")))
+
+## replace all the variables specified with NA
+replace_with_na_all(replace = list(grade = c('N/A', 'N/a')))
+replace_with_na_all(condition = ~.x %in% c("N/A","missing","na"))
+replace_with_na_all(pacman, ~.x %in% c("N/A", "missing", "na", " "))
+
+## replace a subset of selected variables specified with NA
+replace_with_na_at(~.x == "N/A")
+replace_with_na_at(~.x %in% c("N/A", "missing", "na", " "))
+replace_with_na_at(pacman,
+                   .vars = c("year", "month", "day"), 
+                   ~.x %in% c("N/A", "missing", "na", " "))
+
+## replace a subset of variables that fulfill some condition
+replace_with_na_if()
+# replace with NA the character values using `is.character`
+replace_with_na_if(pacman,
+                   .predicate = is.character, 
+                   ~.x %in% c("N/A", "missing", "na", " "))
+
+```
+
+## Making implicit missings explicit
+```{r}
+# fill values with the patterns of 2 columns
+tetris %>%
+  tidyr :: complete(name, time)
+
+# fill values with the specific column
+tetris %>%
+  tidyr :: fill(name)
+
+```
+
+## Testing missing relationships
+
+**Missing data dependence**
+
+*MCAR* Missing Completely at Random
+- missingness has no association with any data you have observed or not observed.
+*MAR* Missing at Random
+- missingness depends on data observed, but not data unobserved
+*MNAR* Missing Not at random
+- missingness of the response is related to an unobserved value relevant to the assessment of interest
+
+```{r}
+#### To see how data related to the missingness
+# - the shadow matrix:
+# using nabular data to perform summaries
+airquality %>%
+  bind_shadow() %>%
+  group_by(Ozone_NA) %>%
+  summarise(mean = mean(Wind))
+
+# Create shadow matrix data with `as_shadow()`
+as_shadow(airquality)
+
+# Bind only the variables with missing values
+bind_shadow(airquality, only_miss= TRUE)
+
+# calculate summary statistics based on the missingness of another variable.
+oceanbuoys %>%
+  bind_shadow() %>%
+  group_by(humidity_NA) %>% 
+  summarise(wind_ew_mean = mean(wind_ew), # calculate mean of wind_ew
+            wind_ew_sd = sd(wind_ew), # calculate standard deviation of wind_ew
+            n_obs = n()) # calculate number of observation of different groups
+
+
+### Use nabular data to explore the variation in a variable by the missingness of another.
+# Explore the distribution of `wind_ew` for the missingness of `air_temp_c_NA` using  `geom_density()`
+bind_shadow(oceanbuoys) %>%
+  ggplot(aes(x = wind_ew, 
+             color = air_temp_c_NA)) + 
+  geom_density()
+
+
+# Explore the distribution of wind east west (`wind_ew`) for the missingness of air temperature using  `geom_density()` and facetting by the missingness of air temperature (`air_temp_c_NA`).
+oceanbuoys %>%
+  bind_shadow() %>%
+  ggplot(aes(x = wind_ew)) + 
+  geom_density() + 
+  facet_wrap(~air_temp_c_NA)
+
+# Build upon this visualisation by coloring by the missingness of humidity (`humidity_NA`).
+oceanbuoys %>%
+  bind_shadow() %>%
+  ggplot(aes(x = wind_ew,
+             color = humidity_NA)) + 
+  geom_density() + 
+  facet_wrap(~humidity_NA)
+
+
+# Explore the distribution of wind east west (`wind_ew`) for the missingness of air temperature using  `geom_boxplot()`
+oceanbuoys %>%
+  bind_shadow() %>%
+  ggplot(aes(x = air_temp_c_NA,
+             y = wind_ew)) + 
+  geom_boxplot()
+
+# Build upon this visualisation by facetting by the missingness of humidity (`humidity_NA`).
+oceanbuoys %>%
+  bind_shadow() %>%
+  ggplot(aes(x = air_temp_c_NA,
+             y = wind_ew)) + 
+  geom_boxplot() + 
+  facet_wrap(~humidity_NA)
+
+
+# Explore the missingness in wind and air temperature, and display the missingness using `geom_miss_point()`
+ggplot(oceanbuoys,
+       aes(x = wind_ew,
+           y = air_temp_c)) + 
+  geom_miss_point()
+
+# Explore the missingness in humidity and air temperature, and display the missingness using `geom_miss_point()`
+ggplot(oceanbuoys,
+       aes(x = humidity,
+           y = air_temp_c)) + 
+  geom_miss_point()
+
+# Use geom_miss_point() and facet_grid to explore how the missingness in wind_ew and air_temp_c is different for missingness of humidity AND by year - by using `facet_grid(humidity_NA ~ year)`
+bind_shadow(oceanbuoys) %>%
+  ggplot(aes(x = wind_ew,
+             y = air_temp_c)) + 
+  geom_miss_point() + 
+  facet_grid(humidity_NA~year)
+```
+
+# 4. performing and tracking imputation
+
+impute_below(c(5,6,7,NA,9.10))
+# impute by some conditions
+impute_below_if(data,is.numeric)
+# impurt below variables specified
+impute_below_at(data,vars(var1,var2))
+# impute all variables
+impute_below_all()
+
+## we can nabular dataset before we impute the data so that you can track the cchange
+bind_shadow(df) %>%
+  impute_below_all()
+
+## visualise imputed values against data values using histograms
+# Impute the oceanbuoys data below the range using `impute_below`.
+ocean_imp <- impute_below_all(oceanbuoys)
+ggplot(ocean_imp, 
+       aes(x = wind_ew, y = air_temp_c)) +  
+  geom_point()
+
+# Impute and track data with `bind_shadow`, `impute_below_all`, and `add_label_shadow`
+ocean_imp_track <- bind_shadow(oceanbuoys) %>% 
+  impute_below_all() %>% 
+  add_label_shadow()
+
+
+# Impute and track the missing values
+ocean_imp_track <- bind_shadow(oceanbuoys) %>% 
+  impute_below_all() %>% 
+  add_label_shadow()
+
+# Visualise the missingness in wind and air temperature, coloring missing air temp values with air_temp_c_NA
+ggplot(ocean_imp_track, 
+       aes(x = wind_ew, y = air_temp_c, color = air_temp_c_NA)) + 
+  geom_point()
+
+# Visualise humidity and air temp, coloring any missing cases using the variable any_missing
+ggplot(ocean_imp_track, 
+       aes(x = humidity, y = air_temp_c, color = any_missing)) +  
+  geom_point()
+
+
+## create histogram of imputed data
+
+# Explore the values of air_temp_c, visualising the amount of missings with `air_temp_c_NA`.
+p <- ggplot(ocean_imp_track, aes(x = air_temp_c, fill = air_temp_c_NA)) +  geom_histogram()
+
+# Expore the missings in humidity using humidity_NA
+p2 <- ggplot(ocean_imp_track,  aes(x = humidity, fill = humidity_NA)) + geom_histogram()
+
+# Explore the missings in air_temp_c according to year, using `facet_wrap(~year)`.
+p + facet_wrap(~year)
+
+# Explore the missings in humidity according to year, using `facet_wrap(~year)`.
+p2 + facet_wrap(~year)
+
+
+#### what makes a good imputation?
+###imput values using mean
+# Impute the mean value and track the imputations 
+ocean_imp_mean <- bind_shadow(oceanbuoys) %>% 
+  impute_mean_all() %>% 
+  add_label_shadow()  # add "any_missing" variable to display the missingness by words
+
+
+# Impute the mean value and track the imputations 
+ocean_imp_mean <- bind_shadow(oceanbuoys) %>% 
+  impute_mean_all() %>% 
+  add_label_shadow()
+
+# Explore the mean values in humidity in the imputed dataset
+ggplot(ocean_imp_mean, 
+       aes(x = humidity_NA, y = humidity)) + 
+  geom_boxplot()
+
+# Explore the values in air temperature in the imputed dataset
+ggplot(ocean_imp_mean, 
+       aes(x = air_temp_c_NA, y = air_temp_c)) + 
+  geom_boxplot()
+
+##Evaluating imputations: The scale
+
+# Explore imputations in air temperature and humidity, coloring by the variable, any_missing
+ggplot(ocean_imp_mean, 
+       aes(x = air_temp_c, y = humidity, color = any_missing)) + 
+  geom_point()
+
+# Explore imputations in air temperature and humidity, coloring by the variable, any_missing, and faceting by year
+ggplot(ocean_imp_mean, 
+       aes(x = air_temp_c, y = humidity, color = any_missing)) + 
+  geom_point() +  
+  facet_wrap(~year)
+
+##when you want to look at the imputation for many variables
+
+# Gather the imputed data 
+ocean_imp_mean_gather <- shadow_long(ocean_imp_mean,humidity,air_temp_c)
+# Inspect the data
+ocean_imp_mean_gather
+
+# Explore the imputations in a histogram 
+ggplot(ocean_imp_mean_gather, 
+       aes(x = value, fill = value_NA)) + 
+  geom_histogram() + 
+  facet_wrap(~variable)
+
+
+#### impute values with linear model
+library(simputation)
+
+# Impute humidity and air temperature using wind_ew and wind_ns, and track missing values
+ocean_imp_lm_wind <- oceanbuoys %>% 
+  bind_shadow() %>%
+  impute_lm(air_temp_c ~ wind_ew + wind_ns) %>% 
+  impute_lm(humidity ~ wind_ew + wind_ns) %>%
+  add_label_shadow()
+
+# Plot the imputed values for air_temp_c and humidity, colored by missingness
+ggplot(ocean_imp_lm_wind, 
+       aes(x = air_temp_c, y = humidity, color = any_missing)) + 
+  geom_point()
+
+
+## compare the imputation performance using linear model and mean method
+# Bind the models together 
+bound_models <- bind_rows(mean = ocean_imp_mean,
+                          lm_wind = ocean_imp_lm_wind,
+                          .id = "imp_model")
+
+# Inspect the values of air_temp and humidity as a scatterplot
+ggplot(bound_models, 
+       aes(x = air_temp_c, 
+           y = humidity, 
+           color = any_missing)) +
+  geom_point() + 
+  facet_wrap(~imp_model)
+
+
+## Compare multiple models
+# Build a model adding year to the outcome
+ocean_imp_lm_wind_year <- bind_shadow(oceanbuoys) %>%
+  impute_lm(air_temp_c ~ wind_ew + wind_ns + year) %>%
+  impute_lm(humidity ~ wind_ew + wind_ns + year) %>%
+  add_label_shadow()
+
+# Bind the mean, lm_wind, and lm_wind_year models together
+bound_models <- bind_rows(mean = ocean_imp_mean,
+                          lm_wind = ocean_imp_lm_wind,
+                          lm_wind_year = ocean_imp_lm_wind_year,
+                          .id = "imp_model")
+
+# Explore air_temp and humidity, coloring by any missings, and faceting by imputation model
+ggplot(bound_models, aes(x = air_temp_c, y = humidity, color = any_missing)) + 
+  geom_point() + facet_wrap(~imp_model)
+
+
+#### Assessing inference from imputed data in a modelling context
+# Create an imputed dataset using a linear models
+ocean_imp_lm_all <- bind_shadow(oceanbuoys) %>%
+  add_label_shadow() %>%
+  impute_lm(sea_temp_c ~ wind_ew + wind_ns + year + latitude + longitude) %>%
+  impute_lm(air_temp_c ~ wind_ew + wind_ns + year + latitude + longitude) %>%
+  impute_lm(humidity ~ wind_ew + wind_ns + year + latitude + longitude)
+
+# Bind the datasets
+bound_models <- bind_rows(cc = ocean_cc,
+                          imp_lm_wind = ocean_imp_lm_wind,
+                          imp_lm_all = ocean_imp_lm_all,
+                          .id = "imp_model")
+# Look at the models
+bound_models
+
+# Create the model summary for each dataset
+model_summary <- bound_models %>% 
+  group_by(imp_model) %>%
+  nest() %>%
+  mutate(mod = map(data, ~lm(sea_temp_c ~ air_temp_c + humidity + year, data = .)),
+         res = map(mod, residuals),
+         pred = map(mod, predict),
+         tidy = map(mod, tidy))
+
+# Explore the coefficients in the model
+model_summary %>% 
+  select(imp_model,tidy) %>%
+  unnest()
+best_model <- "imp_lm_all"
