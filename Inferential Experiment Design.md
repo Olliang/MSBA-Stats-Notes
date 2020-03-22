@@ -385,7 +385,7 @@ match_output <- matchit(premium ~ view_time_total_hr, data = data_pre,
 ```
 
 
-
+![technical notes](https://github.com/Olliang/MSBA-Stats-Notes/blob/master/images/Fixed%20effect%20-%20technical.PNG)
 
 
 
