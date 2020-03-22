@@ -5,7 +5,7 @@
 
 
 
-### 1. Correlation and Causation
+## 1. Correlation and Causation
 
 A causal relationship between A and B means A and B are correlated. 
 
@@ -15,7 +15,7 @@ Correlation between A and B doesn't is not equal to a causal relationship betwee
 
 
 
-### 2. Threats to Causal Inference
+## 2. Threats to Causal Inference
 
 - **Selection**:  our sample is not representative
 
@@ -49,7 +49,7 @@ systematic measurement error can lead to bias
 
 
 
-### 3. Endogeneity
+## 3. Endogeneity
 
 Omitted variables, simultaneity, and measurement error issues are often referred to as sources of **endogeneity**. 
 
@@ -214,8 +214,7 @@ summary(m7)
 
 
 
-
-### 5. Matching 
+## 5. Matching 
 
 What we can do if we don't have an experiment?
 
@@ -388,7 +387,7 @@ match_output <- matchit(premium ~ view_time_total_hr, data = data_pre,
 
 
 
-### 6. Panel Data Models
+## 6. Panel Data Models
 
 What if we do not observe a confound?
 
@@ -458,7 +457,7 @@ phtest(FE_model, RE_model)
 
 
 
-### 7. Difference-indifference
+## 7. Difference-indifference
 
 How do you handle time-variant confound?
 
