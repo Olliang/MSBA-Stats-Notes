@@ -10,7 +10,7 @@
 
 A causal relationship between A and B means A and B are correlated. 
 
-Correlation between A and B doesn't is not equal to a causal relationship between A and B.
+Correlation between A and B is not equal to a causal relationship between A and B.
 
 
 
