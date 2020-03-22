@@ -557,3 +557,4 @@ did_basic_placebo = lm(view_time_total_hr ~ premium + after_placebo + premium*af
 summary(did_basic_placebo)
 ```
 
+![technical notes](https://github.com/Olliang/MSBA-Stats-Notes/blob/master/images/DID-technical.PNG)
