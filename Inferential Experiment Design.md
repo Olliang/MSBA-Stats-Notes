@@ -3,6 +3,7 @@
 [Note: This is my class notes collected from [Mochen Yang](https://carlsonschool.umn.edu/faculty/mochen-yang)'s class. Copy right belongs to him.]
 
 
+![process](https://github.com/Olliang/MSBA-Stats-Notes/blob/master/images/common%20thought%20process.png)
 
 
 ## 1. Correlation and Causation
