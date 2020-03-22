@@ -2,11 +2,16 @@
 
 [Note: This is my class notes collected from [Mochen Yang](https://carlsonschool.umn.edu/faculty/mochen-yang)'s class. Copy right belongs to him.]
 
+
+
+
 ### 1. Correlation and Causation
 
 A causal relationship between A and B means A and B are correlated. 
 
 Correlation between A and B doesn't is not equal to a causal relationship between A and B.
+
+
 
 
 
@@ -39,6 +44,8 @@ Cov(e,X) =0 is an example of random error
 Cov(e,X) /= 0 is an example of systematic error
 
 systematic measurement error can lead to bias
+
+
 
 
 
@@ -203,6 +210,8 @@ summary(m7)
 # The strength of the moderation, however, is pretty small from a practical point of view.
 # How to read the coefficient of the interaction term is negative => when you have a popular movie, the positive effect of the discount on lease is reduced.
 ```
+
+
 
 
 
@@ -376,6 +385,9 @@ match_output <- matchit(premium ~ view_time_total_hr, data = data_pre,
 
 
 
+
+
+
 ### 6. Panel Data Models
 
 What if we do not observe a confound?
@@ -439,6 +451,8 @@ summary(RE_model)
 # rejected, I have a strong reason to use the fixed effect regression
 phtest(FE_model, RE_model)
 ```
+
+
 
 
 
