@@ -67,7 +67,7 @@ To establish **causality**:
 
 
 
-### 4. Experiment with Randomization
+## 4. Experiment with Randomization
 
 **4.1 Randomized controlled trials**
 
