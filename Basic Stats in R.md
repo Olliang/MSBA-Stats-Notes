@@ -2,6 +2,8 @@
 
 # Basic Stats in R
 
+[Note: This is my class notes collected from [Shawn Curley](https://carlsonschool.umn.edu/faculty/shawn-curley)'s class. Copy right belongs to him.]
+
 ### 1. Description
 
 1.1 Summary 
